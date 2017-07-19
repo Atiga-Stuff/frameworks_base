@@ -48,6 +48,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.settingslib.AccessibilityContentDescriptions;
 import com.android.settingslib.SignalIcon.MobileIconGroup;
 import com.android.settingslib.graph.SignalDrawable;
+import com.android.settingslib.mobile.MobileMappings;
 import com.android.settingslib.mobile.MobileMappings.Config;
 import com.android.settingslib.mobile.MobileStatusTracker;
 import com.android.settingslib.mobile.MobileStatusTracker.MobileStatus;
@@ -109,6 +110,8 @@ public class MobileSignalController extends SignalController<MobileState, Mobile
 
     private static final String COMBINED_STATUS_BAR_SIGNAL_ICONS =
             "system:" + Settings.System.COMBINED_STATUS_BAR_SIGNAL_ICONS;
+    private static final String SHOW_FOURG_ICON =
+            "system:" + Settings.System.SHOW_FOURG_ICON;
 
     private final MobileStatusTracker.Callback mMobileCallback =
             new MobileStatusTracker.Callback() {
@@ -237,6 +240,7 @@ public class MobileSignalController extends SignalController<MobileState, Mobile
         mProviderModelSetting = featureFlags.isProviderModelSettingEnabled();
 
         Dependency.get(TunerService.class).addTunable(this, COMBINED_STATUS_BAR_SIGNAL_ICONS);
+        Dependency.get(TunerService.class).addTunable(this, SHOW_FOURG_ICON);
     }
 
     @Override
@@ -249,6 +253,11 @@ public class MobileSignalController extends SignalController<MobileState, Mobile
                     mProviderModelBehavior = value;
                     restartSystemUI();
                 }
+                break;
+            case SHOW_FOURG_ICON:
+                mConfig = Config.readConfig(mContext);
+                setConfiguration(mConfig);
+                notifyListeners();
                 break;
             default:
                 break;

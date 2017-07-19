@@ -5245,6 +5245,12 @@ public final class Settings {
                 "lockscreen_quick_unlock_control";
 
         /**
+         * Whether to display 4G icon instead LTE
+         * @hide
+         */
+        public static final String SHOW_FOURG_ICON = "show_fourg_icon";
+
+        /**
          * Whether to show the battery bar
          * @hide
          */
