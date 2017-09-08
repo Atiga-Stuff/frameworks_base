@@ -71,6 +71,7 @@ android_library {
         "//frameworks/libs/systemui:com_android_systemui_shared_flags_lib",
         "//frameworks/libs/systemui:msdl",
         "//frameworks/libs/systemui:view_capture",
+        "org.lineageos.platform.internal",
     ],
     resource_dirs: [
         "res",
