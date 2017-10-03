@@ -131,6 +131,8 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
 
     private List<String> mBlockedIcons = new ArrayList<>();
 
+    private View mBatteryBar;
+
     private SignalCallback mSignalCallback = new SignalCallback() {
         @Override
         public void setIsAirplaneMode(@NonNull IconState icon) {
@@ -213,6 +215,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
         mStatusBarIconController.addIconGroup(mDarkIconManager);
         mSystemIconArea = mStatusBar.findViewById(R.id.system_icon_area);
         mNetworkTrafficHolder = mStatusBar.findViewById(R.id.network_traffic_holder);
+        mBatteryBar = mStatusBar.findViewById(R.id.battery_bar);
         mClockController = mStatusBar.getClockController();
         mOngoingCallChip = mStatusBar.findViewById(R.id.ongoing_call_chip);
         showSystemIconArea(false);
@@ -458,11 +461,13 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
     }
 
     private void hideSystemIconArea(boolean animate) {
+        animateHide(mBatteryBar, animate);
         animateHide(mSystemIconArea, animate);
         animateHide(mNetworkTrafficHolder, animate);
     }
 
     private void showSystemIconArea(boolean animate) {
+        animateShow(mBatteryBar, animate);
         // Only show the system icon area if we are not currently animating
         int state = mAnimationScheduler.getAnimationState();
         if (state == IDLE || state == SHOWING_PERSISTENT_DOT) {
