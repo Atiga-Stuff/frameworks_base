@@ -107,9 +107,12 @@ public class MobileSignalController extends SignalController<MobileState, Mobile
     private final String[] mMobileStatusHistory = new String[STATUS_HISTORY_SIZE];
     // Where to copy the next state into.
     private int mMobileStatusHistoryIndex;
+    private boolean mDataDisabledIcon;
 
     private static final String COMBINED_STATUS_BAR_SIGNAL_ICONS =
             "system:" + Settings.System.COMBINED_STATUS_BAR_SIGNAL_ICONS;
+    private static final String DATA_DISABLED_ICON =
+            "system:" + Settings.System.DATA_DISABLED_ICON;
     private static final String SHOW_FOURG_ICON =
             "system:" + Settings.System.SHOW_FOURG_ICON;
 
@@ -240,6 +243,7 @@ public class MobileSignalController extends SignalController<MobileState, Mobile
         mProviderModelSetting = featureFlags.isProviderModelSettingEnabled();
 
         Dependency.get(TunerService.class).addTunable(this, COMBINED_STATUS_BAR_SIGNAL_ICONS);
+        Dependency.get(TunerService.class).addTunable(this, DATA_DISABLED_ICON);
         Dependency.get(TunerService.class).addTunable(this, SHOW_FOURG_ICON);
     }
 
@@ -253,6 +257,11 @@ public class MobileSignalController extends SignalController<MobileState, Mobile
                     mProviderModelBehavior = value;
                     restartSystemUI();
                 }
+                break;
+            case DATA_DISABLED_ICON:
+                mDataDisabledIcon =
+                    TunerService.parseIntegerSwitch(newValue, true);
+                updateTelephony();
                 break;
             case SHOW_FOURG_ICON:
                 mConfig = Config.readConfig(mContext);
@@ -438,7 +447,7 @@ public class MobileSignalController extends SignalController<MobileState, Mobile
                 return new QsInfo(qsTypeIcon, qsIcon, qsDescription);
             }
 
-            if (mCurrentState.showQuickSettingsRatIcon() || mConfig.alwaysShowDataRatIcon) {
+            if (mCurrentState.showQuickSettingsRatIcon() || mDataDisabledIcon) {
                 qsTypeIcon = dataTypeIcon;
             }
 
