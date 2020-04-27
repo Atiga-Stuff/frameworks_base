@@ -45,6 +45,7 @@ import androidx.annotation.VisibleForTesting;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.animation.Interpolators;
+import com.android.systemui.battery.BatteryMeterView;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -66,6 +67,7 @@ import com.android.systemui.statusbar.phone.StatusBarHideIconsForBouncerManager;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.statusbar.phone.StatusBarIconController.DarkIconManager;
 import com.android.systemui.statusbar.phone.StatusBarLocationPublisher;
+import com.android.systemui.statusbar.phone.StatusIconContainer;
 import com.android.systemui.statusbar.phone.fragment.dagger.StatusBarFragmentComponent;
 import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallController;
 import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallListener;
@@ -83,6 +85,8 @@ import java.util.List;
 import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
+
+import lineageos.providers.LineageSettings;
 
 /**
  * Contains the collapsed status bar and handles hiding/showing based on disable flags
@@ -128,6 +132,9 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
     private final Executor mMainExecutor;
     private ClockController mClockController;
     private boolean mIsClockBlacklisted;
+    private BatteryMeterView mBatteryMeterView;
+    private StatusIconContainer mStatusIcons;
+    private int mSignalClusterEndPadding = 0;
 
     private List<String> mBlockedIcons = new ArrayList<>();
 
@@ -148,6 +155,16 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
         }
     };
     private OperatorNameViewController mOperatorNameViewController;
+
+    private BatteryMeterView.BatteryMeterViewCallbacks mBatteryMeterViewCallback =
+            new BatteryMeterView.BatteryMeterViewCallbacks() {
+        @Override
+        public void onHiddenBattery(boolean hidden) {
+            mStatusIcons.setPadding(
+                    mStatusIcons.getPaddingLeft(), mStatusIcons.getPaddingTop(),
+                    (hidden ? 0 : mSignalClusterEndPadding), mStatusIcons.getPaddingBottom());
+        }
+    };
 
     @Inject
     public CollapsedStatusBarFragment(
@@ -219,6 +236,14 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
         mBatteryBar = mStatusBar.findViewById(R.id.battery_bar);
         mLogoImage = mStatusBar.findViewById(R.id.statusbar_logo);
         mClockController = mStatusBar.getClockController();
+        mSignalClusterEndPadding = getResources().getDimensionPixelSize(R.dimen.signal_cluster_battery_padding);
+        mStatusIcons = mStatusBar.findViewById(R.id.statusIcons);
+        int batteryStyle = LineageSettings.System.getInt(getContext().getContentResolver(),
+                LineageSettings.System.STATUS_BAR_BATTERY_STYLE, 0);
+        mStatusIcons.setPadding(mStatusIcons.getPaddingLeft(), mStatusIcons.getPaddingTop(),
+               (batteryStyle == 3/*hidden*/ ? 0 : mSignalClusterEndPadding), mStatusIcons.getPaddingBottom());
+        mBatteryMeterView = mStatusBar.findViewById(R.id.battery);
+        mBatteryMeterView.addCallback(mBatteryMeterViewCallback);
         mOngoingCallChip = mStatusBar.findViewById(R.id.ongoing_call_chip);
         showSystemIconArea(false);
         showClock(false);
@@ -285,6 +310,9 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
         mAnimationScheduler.removeCallback(this);
         if (mNetworkController.hasEmergencyCryptKeeperText()) {
             mNetworkController.removeCallback(mSignalCallback);
+        }
+        if (mBatteryMeterView != null) {
+            mBatteryMeterView.removeCallback(mBatteryMeterViewCallback);
         }
     }
 
