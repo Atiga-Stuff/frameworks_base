@@ -280,7 +280,7 @@ public class BatteryMeterView extends LinearLayout implements DarkReceiver {
         if (mBatteryPercentView == null) {
             return;
         }
-        String bolt = "\u26A1\uFE0E";
+        String bolt = "\u26A1";
         String percentText = NumberFormat.getPercentInstance().format(mLevel / 100f);
         CharSequence mChargeIndicator = mCharging && getBatteryStyle() == BATTERY_STYLE_TEXT
                 ? (bolt + " ") : "";
