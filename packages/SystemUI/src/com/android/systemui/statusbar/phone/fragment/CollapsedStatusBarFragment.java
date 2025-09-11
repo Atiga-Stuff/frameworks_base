@@ -133,6 +133,8 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
 
     private View mBatteryBar;
 
+    private View mLogoImage;
+
     private SignalCallback mSignalCallback = new SignalCallback() {
         @Override
         public void setIsAirplaneMode(@NonNull IconState icon) {
@@ -187,6 +189,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
         mOperatorNameViewControllerFactory = operatorNameViewControllerFactory;
         mSecureSettings = secureSettings;
         mMainExecutor = mainExecutor;
+        mLogoImage = mStatusBar.findViewById(R.id.statusbar_logo);
     }
 
     @Override
@@ -509,11 +512,13 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
 
     public void hideNotificationIconArea(boolean animate) {
         animateHide(mNotificationIconAreaInner, animate);
+        animateHide(mLogoImage, animate);
         animateHide(mCenteredIconArea, animate);
     }
 
     public void showNotificationIconArea(boolean animate) {
         animateShow(mNotificationIconAreaInner, animate);
+        animateShow(mLogoImage, animate);
         animateShow(mCenteredIconArea, animate);
     }
 
