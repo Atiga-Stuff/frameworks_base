@@ -114,7 +114,8 @@ public class HeadsUpAppearanceController extends ViewController<HeadsUpStatusBar
                 new ClockController(statusBarView.getContext(), statusBarView),
                 statusBarView.findViewById(R.id.operator_name_frame),
                 statusBarView.findViewById(R.id.centered_area),
-                statusBarView.findViewById(R.id.centered_icon_area));
+                statusBarView.findViewById(R.id.centered_icon_area),
+                statusBarView.findViewById(R.id.statusbar_logo));
     }
 
     @VisibleForTesting
@@ -133,7 +134,8 @@ public class HeadsUpAppearanceController extends ViewController<HeadsUpStatusBar
             ClockController clockController,
             View operatorNameView,
             View centeredView,
-            View centeredIconView) {
+            View centeredIconView,
+            LogoImage logoImage) {
         super(headsUpStatusBarView);
         mNotificationIconAreaController = notificationIconAreaController;
         mHeadsUpManager = headsUpManager;
@@ -152,7 +154,7 @@ public class HeadsUpAppearanceController extends ViewController<HeadsUpStatusBar
         mNotificationPanelViewController = notificationPanelViewController;
         mStackScrollerController.setHeadsUpAppearanceController(this);
         mClockController = clockController;
-        mLogoImage = statusBarView.findViewById(R.id.statusbar_logo);
+        mLogoImage = logoImage;
         mOperatorNameView = operatorNameView;
         mDarkIconDispatcher = Dependency.get(DarkIconDispatcher.class);
 
