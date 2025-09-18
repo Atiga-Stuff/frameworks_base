@@ -22,6 +22,7 @@ import android.view.View;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.widget.ViewClippingUtil;
+import com.android.systemui.atigaos.logo.LogoImage;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.dagger.qualifiers.RootView;
@@ -88,6 +89,7 @@ public class HeadsUpAppearanceController extends ViewController<HeadsUpStatusBar
     private boolean mAnimationsEnabled = true;
     Point mPoint;
     private KeyguardStateController mKeyguardStateController;
+    private final LogoImage mLogoImage;
 
     @Inject
     public HeadsUpAppearanceController(
@@ -112,7 +114,8 @@ public class HeadsUpAppearanceController extends ViewController<HeadsUpStatusBar
                 new ClockController(statusBarView.getContext(), statusBarView),
                 statusBarView.findViewById(R.id.operator_name_frame),
                 statusBarView.findViewById(R.id.centered_area),
-                statusBarView.findViewById(R.id.centered_icon_area));
+                statusBarView.findViewById(R.id.centered_icon_area),
+                statusBarView.findViewById(R.id.statusbar_logo));
     }
 
     @VisibleForTesting
@@ -131,7 +134,8 @@ public class HeadsUpAppearanceController extends ViewController<HeadsUpStatusBar
             ClockController clockController,
             View operatorNameView,
             View centeredView,
-            View centeredIconView) {
+            View centeredIconView,
+            LogoImage logoImage) {
         super(headsUpStatusBarView);
         mNotificationIconAreaController = notificationIconAreaController;
         mHeadsUpManager = headsUpManager;
@@ -151,6 +155,7 @@ public class HeadsUpAppearanceController extends ViewController<HeadsUpStatusBar
         mStackScrollerController.setHeadsUpAppearanceController(this);
         mClockController = clockController;
         mOperatorNameView = operatorNameView;
+        mLogoImage = logoImage;
         mDarkIconDispatcher = Dependency.get(DarkIconDispatcher.class);
 
         mView.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
@@ -254,6 +259,9 @@ public class HeadsUpAppearanceController extends ViewController<HeadsUpStatusBar
                 if (mOperatorNameView != null) {
                     hide(mOperatorNameView, View.INVISIBLE);
                 }
+                if (mLogoImage != null) {
+                    mLogoImage.setVisibility(View.INVISIBLE);
+                }
             } else {
                 if (!isRightClock) {
                     show(clockView);
@@ -266,6 +274,9 @@ public class HeadsUpAppearanceController extends ViewController<HeadsUpStatusBar
                 }
                 if (mOperatorNameView != null) {
                     show(mOperatorNameView);
+                }
+                if (mLogoImage != null) {
+                    mLogoImage.setVisibility(View.VISIBLE);
                 }
                 hide(mView, View.GONE, () -> {
                     updateParentClipping(true /* shouldClip */);

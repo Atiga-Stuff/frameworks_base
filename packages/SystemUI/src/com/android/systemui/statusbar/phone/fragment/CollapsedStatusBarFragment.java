@@ -132,6 +132,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
     private List<String> mBlockedIcons = new ArrayList<>();
 
     private View mBatteryBar;
+    private View mLogoImage;
 
     private SignalCallback mSignalCallback = new SignalCallback() {
         @Override
@@ -216,6 +217,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
         mSystemIconArea = mStatusBar.findViewById(R.id.system_icon_area);
         mNetworkTrafficHolder = mStatusBar.findViewById(R.id.network_traffic_holder);
         mBatteryBar = mStatusBar.findViewById(R.id.battery_bar);
+        mLogoImage = mStatusBar.findViewById(R.id.statusbar_logo);
         mClockController = mStatusBar.getClockController();
         mOngoingCallChip = mStatusBar.findViewById(R.id.ongoing_call_chip);
         showSystemIconArea(false);
@@ -508,11 +510,13 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
     }
 
     public void hideNotificationIconArea(boolean animate) {
+        animateHide(mLogoImage, animate);
         animateHide(mNotificationIconAreaInner, animate);
         animateHide(mCenteredIconArea, animate);
     }
 
     public void showNotificationIconArea(boolean animate) {
+        animateShow(mLogoImage, animate);
         animateShow(mNotificationIconAreaInner, animate);
         animateShow(mCenteredIconArea, animate);
     }
