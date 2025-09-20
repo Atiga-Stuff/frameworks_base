@@ -286,7 +286,7 @@ public class BatteryMeterView extends LinearLayout implements DarkReceiver {
         }
         String bolt = "\u26A1";
         String percentText = NumberFormat.getPercentInstance().format(mLevel / 100f);
-        CharSequence mChargeIndicator = mCharging && getBatteryStyle() == BATTERY_STYLE_TEXT
+        CharSequence mChargeIndicator = mCharging && (getBatteryStyle() == BATTERY_STYLE_TEXT || getBatteryStyle() == BATTERY_STYLE_HIDDEN)
                 ? (bolt + " ") : "";
         mBatteryPercentView.setText(mChargeIndicator + percentText);
         setContentDescription(
@@ -304,10 +304,18 @@ public class BatteryMeterView extends LinearLayout implements DarkReceiver {
                 showBatteryPercent == 1;
         final boolean drawPercentOnly = mShowPercentMode == MODE_ESTIMATE ||
                 showBatteryPercent == 2;
-        boolean shouldShow =
-                (drawPercentOnly && (!drawPercentInside || mCharging) ||
-                getBatteryStyle() == BATTERY_STYLE_TEXT);
-        shouldShow = shouldShow && !mBatteryStateUnknown;
+        int batteryStyle = getBatteryStyle();
+        boolean shouldShow;
+
+        if (batteryStyle == BATTERY_STYLE_HIDDEN) {
+            // Show percent only when charging
+            shouldShow = mCharging && !mBatteryStateUnknown;
+        } else {
+            shouldShow =
+                    (drawPercentOnly && (!drawPercentInside || mCharging) ||
+                    batteryStyle == BATTERY_STYLE_TEXT);
+            shouldShow = shouldShow && !mBatteryStateUnknown;
+        }
 
         if (shouldShow) {
             mCircleDrawable.setShowPercent(false);
@@ -324,7 +332,7 @@ public class BatteryMeterView extends LinearLayout implements DarkReceiver {
                                 LayoutParams.WRAP_CONTENT,
                                 LayoutParams.MATCH_PARENT));
             }
-            if (getBatteryStyle() == BATTERY_STYLE_TEXT || getBatteryStyle() == BATTERY_STYLE_HIDDEN) {
+            if (batteryStyle == BATTERY_STYLE_TEXT || batteryStyle == BATTERY_STYLE_HIDDEN) {
                 mBatteryPercentView.setPaddingRelative(0, 0, 0, 0);
             } else {
                 Resources res = getContext().getResources();
@@ -335,7 +343,7 @@ public class BatteryMeterView extends LinearLayout implements DarkReceiver {
         } else {
             mCircleDrawable.setShowPercent(drawPercentInside);
             mThemedDrawable.setShowPercent(drawPercentInside);
-            if (showing) {
+            if (showing || (getBatteryStyle() == BATTERY_STYLE_HIDDEN && !mCharging)) {
                 removeView(mBatteryPercentView);
                 mBatteryPercentView = null;
             }
