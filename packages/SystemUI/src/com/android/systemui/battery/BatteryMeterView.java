@@ -210,9 +210,7 @@ public class BatteryMeterView extends LinearLayout implements DarkReceiver {
         mCharging = pluggedIn;
         mLevel = level;
         updatePercentText();
-        if (pluggedIn) {
-            updateShowPercent();
-        }
+        updateShowPercent();
     }
 
     void onPowerSaveChanged(boolean isPowerSave) {
