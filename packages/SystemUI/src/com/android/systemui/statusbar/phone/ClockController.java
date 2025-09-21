@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.phone;
 
 import android.content.Context;
+import android.provider.Settings;
 import android.util.Log;
 import android.view.View;
 
@@ -36,6 +37,9 @@ public class ClockController implements TunerService.Tunable {
     private static final String CLOCK_POSITION =
             "lineagesystem:" + LineageSettings.System.STATUS_BAR_CLOCK;
 
+    private static final String STATUSBAR_CLOCK_CHIP =
+            "system" + Settings.System.STATUSBAR_CLOCK_CHIP;
+
     private static final int CLOCK_POSITION_RIGHT = 0;
     private static final int CLOCK_POSITION_CENTER = 1;
     private static final int CLOCK_POSITION_LEFT = 2;
@@ -45,6 +49,7 @@ public class ClockController implements TunerService.Tunable {
 
     private int mClockPosition = CLOCK_POSITION_LEFT;
     private boolean mBlackListed = false;
+    private boolean showClockBg;
 
     public ClockController(Context context, View statusBar) {
         mContext = context;
@@ -57,6 +62,7 @@ public class ClockController implements TunerService.Tunable {
 
         Dependency.get(TunerService.class).addTunable(this,
                 StatusBarIconController.ICON_HIDE_LIST, CLOCK_POSITION);
+        Dependency.get(TunerService.class).addTunable(this, STATUSBAR_CLOCK_CHIP);
     }
 
     public Clock getClock() {
@@ -80,6 +86,8 @@ public class ClockController implements TunerService.Tunable {
 
         // Override any previous setting
         mActiveClock.setClockVisibleByUser(!mBlackListed);
+        // Add background chip
+        addBackgroundChip(mActiveClock);
     }
 
     @Override
@@ -92,6 +100,9 @@ public class ClockController implements TunerService.Tunable {
             mBlackListed = StatusBarIconController.getIconHideList(
                     mContext, newValue).contains("clock");
         }
+        if (STATUSBAR_CLOCK_CHIP.equals(key)) {
+            showClockBg = TunerService.parseIntegerSwitch(newValue, false);
+        }
         updateActiveClock();
     }
 
@@ -101,5 +112,31 @@ public class ClockController implements TunerService.Tunable {
 
     public void removeDarkReceiver() {
         Dependency.get(DarkIconDispatcher.class).removeDarkReceiver(mActiveClock);
+    }
+
+    private void addBackgroundChip(View vClock) {
+        if (showClockBg) {
+            vClock.setBackgroundResource(R.drawable.sb_date_bg);
+            vClock.setPadding(10,2,10,2);
+        } else {
+            int clockPaddingStart = mContext.getResources().getDimensionPixelSize(
+                    R.dimen.status_bar_clock_starting_padding);
+            int clockPaddingEnd = mContext.getResources().getDimensionPixelSize(
+                    R.dimen.status_bar_clock_end_padding);
+            int leftClockPaddingStart = mContext.getResources().getDimensionPixelSize(
+                    R.dimen.status_bar_left_clock_starting_padding);
+            int leftClockPaddingEnd = mContext.getResources().getDimensionPixelSize(
+                    R.dimen.status_bar_left_clock_end_padding);
+            if (vClock.getId() == R.id.clock) {
+                vClock.setBackgroundResource(0);
+                vClock.setPaddingRelative(leftClockPaddingStart, 0, leftClockPaddingEnd, 0);
+            } else if (vClock.getId() == R.id.clock_center) {
+                vClock.setBackgroundResource(0);
+                vClock.setPaddingRelative(0,0,0,0);
+            } else if (vClock.getId() == R.id.clock_right) {
+                vClock.setBackgroundResource(0);
+                vClock.setPaddingRelative(clockPaddingStart, 0, clockPaddingEnd, 0);
+            }
+        }
     }
 }
